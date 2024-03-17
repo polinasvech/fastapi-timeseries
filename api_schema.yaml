@@ -1,0 +1,270 @@
+components:
+  schemas:
+    Body_login_for_access_token_auth_token__post:
+      properties:
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Secret
+        grant_type:
+          anyOf:
+          - pattern: password
+            type: string
+          - type: 'null'
+          title: Grant Type
+        password:
+          title: Password
+          type: string
+        scope:
+          default: ''
+          title: Scope
+          type: string
+        username:
+          title: Username
+          type: string
+      required:
+      - username
+      - password
+      title: Body_login_for_access_token_auth_token__post
+      type: object
+    CreateUserSchema:
+      properties:
+        password:
+          title: Password
+          type: string
+        repeated_password:
+          title: Repeated Password
+          type: string
+        username:
+          title: Username
+          type: string
+      required:
+      - username
+      - password
+      - repeated_password
+      title: CreateUserSchema
+      type: object
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Detail
+          type: array
+      title: HTTPValidationError
+      type: object
+    Token:
+      properties:
+        access_token:
+          title: Access Token
+          type: string
+        token_type:
+          title: Token Type
+          type: string
+      required:
+      - access_token
+      - token_type
+      title: Token
+      type: object
+    UserSchema:
+      properties:
+        username:
+          title: Username
+          type: string
+      required:
+      - username
+      title: UserSchema
+      type: object
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          title: Location
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      type: object
+  securitySchemes:
+    OAuth2PasswordBearer:
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: auth/token/
+      type: oauth2
+info:
+  description: Analyze Timeseries API
+  title: FastAPI-timeseries
+  version: 0.1.0
+openapi: 3.1.0
+paths:
+  /auth/me/:
+    get:
+      operationId: read_users_me_auth_me__get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSchema'
+          description: Successful Response
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Read Users Me
+      tags:
+      - auth
+  /auth/register/:
+    post:
+      operationId: create_new_user_auth_register__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserSchema'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSchema'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Create New User
+      tags:
+      - auth
+  /auth/token/:
+    post:
+      operationId: login_for_access_token_auth_token__post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_login_for_access_token_auth_token__post'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Login For Access Token
+      tags:
+      - auth
+  /testing/:
+    get:
+      operationId: read_root_testing__get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Read Root
+  /user/change_password/:
+    patch:
+      operationId: change_password_user_change_password__patch
+      parameters:
+      - in: query
+        name: password
+        required: true
+        schema:
+          title: Password
+          type: string
+      - in: query
+        name: repeated_password
+        required: true
+        schema:
+          title: Repeated Password
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSchema'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Change Password
+      tags:
+      - user
+  /user/change_username/:
+    patch:
+      operationId: change_username_user_change_username__patch
+      parameters:
+      - in: query
+        name: username
+        required: true
+        schema:
+          title: Username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSchema'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Change Username
+      tags:
+      - user
+  /user/delete/:
+    delete:
+      operationId: delete_user_user_delete__delete
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response Delete User User Delete  Delete
+                type: boolean
+          description: Successful Response
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Delete User
+      tags:
+      - user

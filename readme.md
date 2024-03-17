@@ -1,18 +1,18 @@
-### Инструкция по запуску
+## Инструкция по запуску
 
 Создать виртуальное окружение
 ```commandline
-python3.11 -m venv venv (Linux)
-py -3.11 -m venv venv (Windows)
+python3.11 -m venv .venv (Linux)
+py -3.11 -m venv .venv (Windows)
 ```
 
-Активировать 
+Активировать
 ```commandline
-source venv/bin/activate (Linux)
-venv\Scripts\activate.bat (Windows)
+source .venv/bin/activate (Linux)
+.venv\Scripts\activate.bat (Windows)
 ```
 
-Установить необходимые библиотеки 
+Установить необходимые библиотеки
 ```commandline
 pip install -r requirements.txt
 ```
@@ -27,9 +27,15 @@ cp .env.example .env
 ./run.sh
 ```
 
-
 #### Проект будет запущен по адресу http://localhost:8001/
 #### Документация OpenAPI http://localhost:8001/docs
+
+
+## Для обновления схемы API
+```commandline
+python export_api_schema.py
+```
+Генерирует схему API в формате json (`api_schema.json`)  и yaml (`api_schema.yaml`)
 
 ### Этапы анализа
 
