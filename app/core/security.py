@@ -57,7 +57,6 @@ async def get_current_user(
         user = session.query(User).where(and_(User.username == token_data.username, User.deleted_at.is_(None))).first()
         if user is None:
             raise credential_exception
-
     return user
 
 

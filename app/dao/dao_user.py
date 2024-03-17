@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import and_, exc, select
+from sqlalchemy import and_, exc
 
 from app.core.db.session import SessionLocal
 from app.core.security import get_password_hash, verify_password
@@ -28,6 +28,7 @@ class DAOUser:
             try:
                 session.add(user)
                 session.commit()
+                session.refresh(user)
             except exc.IntegrityError:
                 raise ConflictError(detail="User already exists")
 
@@ -63,6 +64,17 @@ class DAOUser:
             session.refresh(user)
 
         return UserSchema(username=user.username)
+
+    @classmethod
+    def delete_user(cls, user_id: int) -> bool:
+        with SessionLocal() as session:
+            user = session.query(UserModel).where(and_(UserModel.id == user_id, UserModel.deleted_at.is_(None))).first()
+            user.disabled = True
+            user.deleted_at = datetime.now()
+            session.commit()
+            session.refresh(user)
+
+        return True
 
 
 dao_user = DAOUser()
