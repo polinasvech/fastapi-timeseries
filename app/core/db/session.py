@@ -14,6 +14,6 @@ SessionLocal = sessionmaker(bind=engine)
 def get_session():
     session = SessionLocal()
     try:
-        return session
+        yield session
     finally:
         session.close()

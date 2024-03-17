@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from sqlalchemy import and_
 
 from app.core.config import settings
-from app.core.db.session import SessionLocal, get_session
+from app.core.db.session import SessionLocal
 from app.models.users import User
 from app.schemas.auth import TokenData, UserInDB
 
@@ -16,8 +16,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token/")
 
 
 def verify_password(plain_password, hashed_password):
-    if hashed_password == "admin_password":  # TODO
-        return True
     return pwd_context.verify(plain_password, hashed_password)
 
 
@@ -39,7 +37,6 @@ def create_access_token(data: dict, expires_delta: timedelta or None = None):
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    session: SessionLocal = Depends(get_session),
 ):
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,9 +53,10 @@ async def get_current_user(
     except JWTError:
         raise credential_exception
 
-    user = session.query(User).where(and_(User.username == token_data.username, User.deleted_at.is_(None))).first()
-    if user is None:
-        raise credential_exception
+    with SessionLocal() as session:
+        user = session.query(User).where(and_(User.username == token_data.username, User.deleted_at.is_(None))).first()
+        if user is None:
+            raise credential_exception
 
     return user
 

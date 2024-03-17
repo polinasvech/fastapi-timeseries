@@ -30,3 +30,16 @@ class CreateUserSchema(BaseModel):
         if repeated_pwd != values["password"]:
             raise ValidationError(detail="Passwords do not match")
         return repeated_pwd
+
+
+class UpdateUserSchema(BaseModel):
+    id: int
+    username: str | None = None
+    password: str | None = None
+    repeated_password: str | None = None
+
+    @validator("repeated_password")
+    def passwords_match(cls, repeated_pwd, values):
+        if repeated_pwd != values["password"]:
+            raise ValidationError(detail="Passwords do not match")
+        return repeated_pwd
