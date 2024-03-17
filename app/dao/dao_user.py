@@ -1,21 +1,19 @@
-from sqlalchemy import and_, exc, select
 from datetime import datetime
+
+from sqlalchemy import and_, exc, select
 
 from app.core.db.session import SessionLocal
 from app.core.security import get_password_hash, verify_password
 from app.dao.base import ConflictError, NotFoundError, ValidationError
 from app.models.users import User as UserModel
-from app.schemas.auth import UserInDB, UserSchema, UpdateUserSchema
+from app.schemas.auth import UpdateUserSchema, UserInDB, UserSchema
 
 
 class DAOUser:
     @staticmethod
     def get_user_by_id(user_id: int) -> UserModel:
         with SessionLocal() as session:
-            user = (
-                session.query(UserModel).where(
-                    and_(UserModel.id == user_id, UserModel.deleted_at.is_(None))).first()
-            )
+            user = session.query(UserModel).where(and_(UserModel.id == user_id, UserModel.deleted_at.is_(None))).first()
         if not user:
             raise NotFoundError(detail="User not Found")
         return user
@@ -39,8 +37,9 @@ class DAOUser:
     def get_user_in_db(cls, username: str, password: str) -> UserInDB:
         with SessionLocal() as session:
             user = (
-                session.query(UserModel).where(
-                    and_(UserModel.username == username, UserModel.deleted_at.is_(None))).first()
+                session.query(UserModel)
+                .where(and_(UserModel.username == username, UserModel.deleted_at.is_(None)))
+                .first()
             )
         if not user:
             raise NotFoundError(detail="User not Found")
@@ -51,16 +50,13 @@ class DAOUser:
         return UserInDB(username=user.username, disables=user.disabled, hashed_password=user.password)
 
     @classmethod
-    def change_user(cls,  data: UpdateUserSchema) -> UserSchema:
+    def change_user(cls, data: UpdateUserSchema) -> UserSchema:
         if data.password:
             data.password = get_password_hash(data.password)
 
         with SessionLocal() as session:
-            user = (
-                session.query(UserModel).where(
-                    and_(UserModel.id == data.id, UserModel.deleted_at.is_(None))).first()
-            )
-            for key, value in data.model_dump(mode='json', exclude_unset=True).items():
+            user = session.query(UserModel).where(and_(UserModel.id == data.id, UserModel.deleted_at.is_(None))).first()
+            for key, value in data.model_dump(mode="json", exclude_unset=True).items():
                 setattr(user, key, value)
             user.updated_at = datetime.now()
             session.commit()
