@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.core.config import settings
 from app.core.security import create_access_token, get_current_active_user
 from app.dao.dao_user import dao_user
-from app.schemas.auth import CreateUserSchema, Token, UserSchema
+from app.schemas.auth import CreateUserSchema, Token, UserSchema, UpdateUserSchema, UserChangePassword
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -36,3 +36,13 @@ async def read_users_me(current_user: UserSchema = Depends(get_current_active_us
 @router.post("/register/", response_model=UserSchema)
 async def create_new_user(data: CreateUserSchema):
     return dao_user.create_user(data.username, data.password)
+
+
+@router.post("/login/", response_model=UserSchema)
+async def login(data: CreateUserSchema):
+    return dao_user.create_user(data.username, data.password)
+
+
+@router.patch("/change_password/", response_model=UserSchema)
+async def change_password(data: UserChangePassword, current_user: UserSchema = Depends(get_current_active_user)):
+    return dao_user.change_user(UpdateUserSchema(id=current_user.id, password=data.password))
